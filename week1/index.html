@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Clouds Study</title>
+	<meta charset="utf-8">
+	<!-- see https://tympanus.net/Tutorials/ProceduralClouds/-->
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+	<div id="container"></div>
+	<script src="js/three.min.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/GLTFLoader.js"></script>
+	<script src="js/THREEx.KeyboardState.js"></script>
+	<script src="js/THREEx.FullScreen.js"></script>
+	<script src="js/THREEx.WindowResize.js"></script>
+	<script src="js/TrackballControls.js"></script>
+	<script src="js/jquery-1.9.1.js"></script>
+
+     <!-- image converter available at: https://www.base64-image.de/ -->
+	<script src="images/blue.js"></script>
+	<script src="images/white.js"></script>
+
+	<div id="ThreeJS" style="position: absolute; left:px; top:0px"></div>
+
+	<script>	
+	// MAIN
+	let cam, scene, renderer,
+    		clock, cloudMaterial,
+    		h, w, x=0, y,
+    		cloudParticles = [],
+    		cloudParticles2 = [];
+
+	const animate = () => {
+        let delta = clock.getDelta();
+
+        requestAnimationFrame(animate);
+
+        x = x+.0001;			   
+
+        [].forEach.call(cloudParticles, sp => {
+            sp.rotation.z += delta * 0.2;
+            sp.position.x += x;
+        });
+
+        [].forEach.call(cloudParticles2, sp => {
+            sp.rotation.z += delta * 0.2;
+            sp.position.x += x;
+        });
+
+        renderer.render(scene, cam);
+    },
+    resize = () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    },
+    lights = () => {
+        const light = new THREE.DirectionalLight(0xffffd0, 1.0);
+
+        clock = new THREE.Clock();
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(0x00d0ff, 1);
+        renderer.setSize(w, h);
+
+        scene = new THREE.Scene();
+
+        light.position.set(-1, 0, 1);
+        scene.add(light);
+    },
+    camera = () => {
+        cam = new THREE.PerspectiveCamera(75, w / h, 1, 10000);
+        cam.position.z = 2500;
+
+        scene.add(cam);
+    },
+    action = () => {
+        const loader = new THREE.TextureLoader();
+
+        loader.crossOrigin = '';
+
+        loader.load(
+            white,
+            function onLoad(texture) {
+                const cloudGeo = new THREE.PlaneBufferGeometry(300, 200);
+
+                cloudMaterial = new THREE.MeshLambertMaterial({
+                    map: texture,
+                    color: 0xffffd0,
+                    transparent: true
+                });
+
+                //cloud 1	
+                for (let p = 0, l = 50; p < l; p++) {
+                    let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
+
+                    particle.position.set(
+                        Math.random() * 500 - 850,
+                        Math.random() * 300 - 850,
+                        Math.random() * 1000 - 100
+                    );
+
+                    particle.rotation.z = Math.random() * 360;
+                    scene.add(particle);
+                    cloudParticles.push(particle);
+                }
+
+                //cloud 2
+                for (let p = 0, l = 350; p < l; p++) {
+                    let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
+
+                    particle.position.set(
+                        Math.random() * 500 + 500,
+                        Math.random() * 300 + 500,
+                        Math.random() * 1000 - 100
+                    );
+
+                    particle.rotation.z = Math.random() * 360;
+                    scene.add(particle);
+                    cloudParticles2.push(particle);
+                }
+
+                animate();
+            }
+        );
+    },
+    main = () => {
+        h = window.innerHeight;
+        w = window.innerWidth;
+        
+        lights();
+        camera();
+        action();
+
+        document.body.appendChild(renderer.domElement);
+        window.addEventListener('resize', resize);
+    };
+
+	main();
+
+	</script>
+</body>
+</html>
