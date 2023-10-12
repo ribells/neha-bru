@@ -28,7 +28,8 @@
 	// MAIN
 	let cam, scene, renderer,
     		clock, cloudMaterial,
-    		h, w, x=0, y,
+    		h, w, dx=0, dy=0,
+    		light="",
     		cloudParticles = [],
     		cloudParticles2 = [];
 
@@ -37,16 +38,18 @@
 
         requestAnimationFrame(animate);
 
-        x = x+.0001;			   
+        dx = Math.random(.005)-0.0025;	
+        dy = Math.random(.005)-0.0025;			   
 
         [].forEach.call(cloudParticles, sp => {
             sp.rotation.z += delta * 0.2;
-            sp.position.x += x;
+            sp.position.x += dx;
+            sp.position.y += dy;
         });
 
         [].forEach.call(cloudParticles2, sp => {
             sp.rotation.z += delta * 0.2;
-            sp.position.x += x;
+            sp.position.x += dx;
         });
 
         renderer.render(scene, cam);
@@ -55,7 +58,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     },
     lights = () => {
-        const light = new THREE.DirectionalLight(0xffffd0, 1.0);
+        light = new THREE.PointLight(0xff0000, 1.0);
 
         clock = new THREE.Clock();
 
@@ -65,7 +68,7 @@
 
         scene = new THREE.Scene();
 
-        light.position.set(-1, 0, 1);
+        light.position.set(-850, -850, -100);
         scene.add(light);
     },
     camera = () => {
@@ -87,6 +90,7 @@
                 cloudMaterial = new THREE.MeshLambertMaterial({
                     map: texture,
                     color: 0xffffd0,
+                    emissive: 0xffffff,
                     transparent: true
                 });
 
