@@ -85,7 +85,7 @@
 	const animate = () => {
         let delta = clock.getDelta();
 
-        requestAnimationFrame(animate);
+		setInterval(requestAnimationFrame(animate), 10000);
         
         for (c=0; c<cloud.length; c++) {
 		    var dx = Math.random()*.5-0.25;
@@ -96,16 +96,13 @@
 				sp.position.x += cloud[c].dx;
 				sp.position.y += cloud[c].dy;
 				
-				//alert(sp.position.x + "," + sp.position.y + "," + sp.position.z + ": " +
-				//      player.position.x + "," + player.position.y + "," + player.position.z);
-				
 				if(collision(sp.position.x, sp.position.y, sp.position.z, player.position.x, player.position.y, player.position.z, 50)) {
 					alert("COLLISION!");
 				}
 			});
 			
-			cam.position.x += 0.5;
-			player.position.x += 0.5;
+			cam.position.x += 0.15;
+			player.position.x += 0.15;
 			
 			if(player.position.x > 7000) {
 				alert("WIN level one");
@@ -186,7 +183,7 @@
 				player.position.y = 0;
 				player.position.z = 400;
 
-                animate();
+				animate();
             }
         );
     },
@@ -205,7 +202,6 @@
     };
 
 	main();
-	
 
 	</script>
 </body>
