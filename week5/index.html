@@ -143,6 +143,14 @@
 					document.getElementById("hud").innerHTML = "COLLISION!";
                      document.getElementById("hud").style.color = "red";
 					document.getElementById("hud").style.fontSize = "64px";
+					for (c=0; c<cloud.length; c++) {
+						cloud[c].x -= (player.location.x - 400);
+						[].forEach.call(cloud[c].cloudParticles, sp => {
+							//sp.position.x -= (player.location.x - 400);
+						});
+						player.location.x = 400;
+						camera.location.x = 400;
+					}
 				}
 			});
 			
