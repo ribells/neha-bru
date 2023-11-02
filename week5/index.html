@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Clouds Study</title>
+	<meta charset="utf-8">
+	<!-- see https://tympanus.net/Tutorials/ProceduralClouds/-->
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+	<div id="container"></div>
+    <div id="hud" style="z-index:2;top:20px;left:100px;position:absolute">
+		HERE IS THE STARTING INFORMATION:<br/>
+         USE the W and S keys to avoid the clouds while flying
+	</div>
+	<script src="js/three.min.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/GLTFLoader.js"></script>
+	<script src="js/THREEx.KeyboardState.js"></script>
+	<script src="js/THREEx.FullScreen.js"></script>
+	<script src="js/THREEx.WindowResize.js"></script>
+	<script src="js/TrackballControls.js"></script>
+	<script src="js/jquery-1.9.1.js"></script>
+
+     <!-- image converter available at: https://www.base64-image.de/ -->
+	<script src="images/blue.js"></script>
+	<script src="images/white.js"></script>
+
+	<div id="ThreeJS" style="position: absolute; left:px; top:0px"></div>
+
+	<script>
+	
+	class Cloud {
+	  constructor(x, y, dx, dy, color, intensity, falloff, num_particles) {
+		this.x = x;
+		this.y = y;
+		this.dx = dx;
+		this.dy = dy;
+		this.color = color;
+		this.intensity = intensity;
+		this.falloff = falloff;
+		this.num_particles = num_particles;
+		this.cloudParticles = [];
+	  }
+	}
+	
+	var player = "";
+	
+	function setupKeyControls() {
+      document.onkeydown = function(e) {
+        switch (e.keyCode) {
+          case 87:
+          player.position.y += 25;
+          break;
+          case 83:
+          player.position.y -= 25;
+          break;
+        }
+      };
+    }
+	
+	// MAIN
+	let cam, scene, renderer,
+    		clock, cloudMaterial,
+    		light = [],
+    		cloud = [
+			   new Cloud(7200, -100, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(1200, 300, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(2600, 200, 1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(3200, -800, -1, 0, 0x00ffff, 1.0, 3.0, 10),
+			   new Cloud(4200, 600, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(5900, -1800, -1, 0, 0x0000ff, 1.0, 2.0, 30),
+			   new Cloud(1500, -700, 1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(7200, 600, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(2200, -800, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(1200, 350, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(4200, -570, 1, 0, 0x0000ff, 1.0, 3.0, 43),
+			   new Cloud(8600, 900, -1, 0, 0x0000ff, 1.0, 3.0, 30),
+			   new Cloud(5400, -650, -1, 0, 0x0000ff, 1.0, 3.0, 20),
+			   new Cloud(2500, 400, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(6200, -470, 1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(7000, -800, -1, 0, 0xffffff, 1.0, 3.0, 10),
+			   new Cloud(9200, -600, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(1300, 800, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(2500, -890, 1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(3400, 800, 1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(9500, 700, -1, 0, 0xff00ff, 1.0, 3.0, 10),
+			   new Cloud(5100, -800, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(6000, 940, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(8400, -800, -1,0, 0x0000ff, 1.0, 3.0, 18),
+			   new Cloud(9500, -590, 1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(1900, 800, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(2400, 790, -1, 0, 0x00ffff, 5.0, 3.0, 10),
+			   new Cloud(7300, -800, 1,0, 0x0000ff, 1.0, 3.0, 60),
+			   new Cloud(4800, 470, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(5300, 100, -1, 0, 0x0000ff, 1.0, 3.0, 40),
+			   new Cloud(9400, -590, -1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(7000, 400, 1, 0, 0x0000ff, 1.0, 3.0, 10),
+			   new Cloud(9800, 500, 1, 0, 0x00ff00, 1.0, 3.0, 10),
+			   new Cloud(8500, 670, 1, 0, 0x00ff00, 1.0, 3.0, 10),
+			   new Cloud(400, 790, -1, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(-400, -780, -1, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(-200, 390, -1, 0, 0xff0000, 5.0, 3.0, 10),
+			   new Cloud(-300, -720, -1, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(-100, -380, -1, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(10400, 900, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(12400, -940, 0, 0, 0x00ffff, 7.0, 3.0, 10),
+			   new Cloud(14400, -450, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(12700, 780, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+			   new Cloud(19300, 460, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(15600, -960, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(18900, 320, 0, 0, 0x0000ff, 2.0, 3.0, 10),
+			   new Cloud(14200, -700, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			   new Cloud(12890, -567, 0,0, 0x00ff00, 3.0, 3.0, 10),
+			   new Cloud(13650, 356, 0, 0, 0xff00ff, 6.0, 3.0, 10),
+			   new Cloud(15900, -743, 0, 0, 0x0000ff, 4.0, 3.0, 10),
+			    
+			];
+
+	function collision(x, y, z, x1, y1, z1, t) {
+		if(Math.sqrt((x-x1)*(x-x1) + (y-y1)*(y-y1) + (z-z1)*(z-z1)) < t) {
+			return true;
+		} else {
+		    return false;
+		}
+	}
+	
+	const animate = () => {
+        let delta = clock.getDelta();
+
+		setInterval(requestAnimationFrame(animate), 10000);
+        
+        for (c=0; c<cloud.length; c++) {
+		    var dx = Math.random()*.5-0.25;
+        	var dy = Math.random()*.5-0.25;
+
+			[].forEach.call(cloud[c].cloudParticles, sp => {
+				sp.rotation.z += delta * 0.2;
+				sp.position.x += cloud[c].dx;
+				sp.position.y += cloud[c].dy;
+				
+				if(collision(sp.position.x, sp.position.y, sp.position.z, player.position.x, player.position.y, player.position.z, 50)) {
+					document.getElementById("hud").innerHTML = "COLLISION!";
+                     document.getElementById("hud").style.color = "red";
+					document.getElementById("hud").style.fontSize = "64px";
+				}
+			});
+			
+			cam.position.x += 0.15;
+			player.position.x += 0.15;
+			
+			if(player.position.x > 20000) {
+				alert("WIN level one");
+			}
+        }
+
+        renderer.render(scene, cam);
+    },
+    resize = () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    },
+    lights = () => {
+        clock = new THREE.Clock();
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(0x00d0ff, 1.0);
+        renderer.setSize(w, h);
+
+        scene = new THREE.Scene();
+		
+		//add lights to color the clouds
+    	for (c=0; c<cloud.length; c++) {
+    		light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
+    		light[c].position.set(cloud[c].x-100, cloud[c].y+100, 1080);
+    		scene.add(light[c]);
+    	}
+    },
+    camera = () => {
+        cam = new THREE.OrthographicCamera(10000 / - 2, 10000 / 2, 10000 / 2, 10000 / - 2, 1, 100000);
+        cam.position.z = 12000;
+
+        scene.add(cam);
+    },
+    action = () => {
+        const loader = new THREE.TextureLoader();
+
+        loader.crossOrigin = '';
+
+        loader.load(
+            white,
+            function onLoad(texture) {
+                const cloudGeo = new THREE.PlaneBufferGeometry(400, 400);
+
+                cloudMaterial = new THREE.MeshLambertMaterial({
+                    map: texture,
+                    color: 0xffffff,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.3,
+                    transparent: true
+                });
+                
+                //create clouds
+                for (c=0; c<cloud.length; c++) {
+					for (let p = 0, l = cloud[c].num_particles; p < l; p++) {
+						let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
+
+						particle.position.set(
+							Math.random() * 100 + cloud[c].x,
+							Math.random() * 100 + cloud[c].y,
+							Math.random() * 40 + 380
+						);
+
+						particle.rotation.z = Math.random() * 360;
+						scene.add(particle);
+						cloud[c].cloudParticles.push(particle);
+					}
+                }
+                
+                const geometry = new THREE.BoxBufferGeometry(200, 200, 200);
+
+				//add a player
+				const material = new THREE.MeshBasicMaterial();
+				// create a Mesh containing the geometry and material
+				player = new THREE.Mesh(geometry, material);
+				// add the mesh to the scene
+				scene.add(player);
+				player.position.x = 500;
+				player.position.y = 0;
+				player.position.z = 400;
+
+				animate();
+            }
+        );
+    },
+    main = () => {
+        h = window.innerHeight;
+        w = window.innerWidth;
+        
+        lights();
+        camera();
+        action();
+
+        document.body.appendChild(renderer.domElement);
+        window.addEventListener('resize', resize);
+        
+        setupKeyControls();
+    };
+
+	main();
+
+	</script>
+</body>
+</html>
