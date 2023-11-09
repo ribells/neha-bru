@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Clouds Study</title>
+	<meta charset="utf-8">
+	<!-- see https://tympanus.net/Tutorials/ProceduralClouds/-->
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+	<div id="container"></div>
+	<script src="js/three.min.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/GLTFLoader.js"></script>
+	<script src="js/THREEx.KeyboardState.js"></script>
+	<script src="js/THREEx.FullScreen.js"></script>
+	<script src="js/THREEx.WindowResize.js"></script>
+	<script src="js/TrackballControls.js"></script>
+	<script src="js/jquery-1.9.1.js"></script>
+
+     <!-- image converter available at: https://www.base64-image.de/ -->
+	<script src="images/blue.js"></script>
+	<script src="images/white.js"></script>
+
+	<div id="ThreeJS" style="position: absolute; left:px; top:0px"></div>
+
+	<script>
+	
+	class Cloud {
+	  constructor(x, y, dx, dy, color, intensity, falloff, num_particles) {
+		this.x = x;
+		this.y = y;
+		this.dx = x;
+		this.dy = y;
+		this.color = color;
+		this.intensity = intensity;
+		this.falloff = falloff;
+		this.num_particles = num_particles;
+		this.cloudParticles = [];
+	  }
+	}
+	
+	class Blockhead {
+	  constructor(x, y, z, scale, model) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.scale = scale;
+		this.model = model;
+	  }
+	}
+	
+	// MAIN
+	let cam, scene, renderer, controls, clock, cloudMaterial,
+		h, w, dx, dy,
+		light = [],
+		bhead = [
+			new Blockhead(0, 0, 1400, 100, ""),
+		],
+		cloud = [
+			new Cloud(-800, -800, 0, 0, 0x0000ff, 1.0, 3.0, 50),
+			new Cloud(500, 500, 0, 0, 0xff8000, 1.0, 3.0, 50),
+			new Cloud(700, -800, 0, 0, 0x00ff00, 1.0, 3.0, 100)
+		];
+
+	const animate = () => {
+        let delta = clock.getDelta();
+
+        requestAnimationFrame(animate);
+        
+        for (c=0; c<cloud.length; c++) {
+		    dx = Math.random()*.5-0.25;
+        	dy = Math.random()*.5-0.25;
+
+			[].forEach.call(cloud[c].cloudParticles, sp => {
+				sp.rotation.z = sp.rotation.z += delta * 0.2;
+				sp.rotation.y = cam.rotation.y;
+				sp.rotation.x = cam.rotation.x;
+				sp.position.x += dx;
+				sp.position.y += dy;
+			});
+        }
+        
+        controls.update();
+
+        renderer.render(scene, cam);
+    },
+    resize = () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    },
+    lights = () => {
+        clock = new THREE.Clock();
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(0x00d0ff, 1.0);
+        renderer.setSize(w, h);
+
+        scene = new THREE.Scene();
+        
+        var dlight = new THREE.DirectionalLight(0x0000ff, 1.0);
+        scene.add(dlight);
+
+    	for (c=0; c<cloud.length; c++) {
+    		light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
+    		light[c].position.set(cloud[c].x+100, cloud[c].y+100, 200);
+    		scene.add(light[c]);
+    		light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
+    		light[c].position.set(cloud[c].x-100, cloud[c].y-100, 1200);
+    		scene.add(light[c]);
+    	}
+    	
+    	dlight.target = light[0];
+    },
+    camera = () => {
+        cam = new THREE.PerspectiveCamera(75, w / h, 1, 10000);
+        cam.position.z = 2500;
+
+        scene.add(cam);
+    },
+    action = () => {
+        const loader = new THREE.TextureLoader();
+
+        loader.crossOrigin = '';
+
+        loader.load(
+            white,
+            function onLoad(texture) {
+                const cloudGeo = new THREE.PlaneBufferGeometry(400, 400);
+
+                cloudMaterial = new THREE.MeshLambertMaterial({
+                    map: texture,
+                    color: 0xffffff,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.3,
+                    transparent: true
+                });
+                
+                for (c=0; c<cloud.length; c++) {
+					for (let p = 0, l = cloud[c].num_particles; p < l; p++) {
+						let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
+
+						particle.position.set(
+							Math.random() * 500 + cloud[c].x,
+							Math.random() * 300 + cloud[c].y,
+							Math.random() * 1000 - 100
+						);
+
+						particle.rotation.z = Math.random() * 360;
+						scene.add(particle);
+						cloud[c].cloudParticles.push(particle);
+					}
+                }
+                animate();
+            }
+        );
+        
+    	//load blockheads
+    	var bhead_model = "";
+    	var idx = 0;
+		for(bno=0; bno<bhead.length; bno++) {
+		  bhead_model = this;
+		  var glloader = new THREE.GLTFLoader();
+		  glloader.load(
+			"blockhead.glb",
+			 function ( gltf ) {
+			   bhead_model = gltf.scene; 
+			   bhead_model.rotation.set ( Math.PI, 0, Math.PI );
+			   bhead_model.position.set ( bhead[idx].x, bhead[idx].y, bhead[idx].z );
+			   bhead_model.scale.set (bhead[idx].scale, bhead[idx].scale, bhead[idx].scale);
+			   bhead[idx].model = bhead_model;
+			   scene.add(bhead_model);
+			   idx++;
+			 }
+		  );	
+		}	
+    },
+    main = () => {
+        h = window.innerHeight;
+        w = window.innerWidth;
+        
+        lights();
+        camera();
+        action();
+        
+		// CONTROLS
+		controls = new THREE.TrackballControls( cam );
+		controls.rotateSpeed = 1;
+		controls.noPan = false;
+		controls.target.set(0, 0, 0);
+
+        document.body.appendChild(renderer.domElement);
+        window.addEventListener('resize', resize);
+    };
+
+	main();
+
+	</script>
+</body>
+</html>
