@@ -205,8 +205,8 @@
 					} else {
 						sp.position.x += cloud[c].dx;
 						sp.position.y += cloud[c].dy;
-						cam.position.x += 0.02;
-						player.position.x += 0.02;
+						cam.position.x += 0.05;
+						player.position.x += 0.05;
 						min_delta = 20;
 						document.getElementById("hud").innerHTML = "";
 					}
@@ -293,6 +293,20 @@
 				player.position.x = 500;
 				player.position.y = 0;
 				player.position.z = 400;
+				
+				//add a finish line
+				var finish_line = this;
+				var glloader = new THREE.GLTFLoader();
+				glloader.load(
+				  "finish line.glb",
+				   function ( gltf ) {
+					 finish_line = gltf.scene;
+					 finish_line.rotation.set ( 0, Math.PI, 0 );
+					 finish_line.position.set (19900, 0, 400);
+					 finish_line.scale.set (20, 20, 20);
+					 scene.add(finish_line);
+				   }
+				);
 
 				animate();
             }
