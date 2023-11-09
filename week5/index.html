@@ -10,8 +10,8 @@
 	<div id="container"></div>
     <div id="hud" style="z-index:2;top:20px;left:100px;position:absolute">
 		HERE IS THE STARTING INFORMATION:<br/>
-         USE the W and S keys to avoid the clouds while flying
-	</div>
+         USE the W and S keys to avoid the clouds while flying<br/>
+		 Reach the end without hitting the clouds to win</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/Detector.js"></script>
 	<script src="js/OrbitControls.js"></script>
@@ -64,56 +64,87 @@
     		clock, cloudMaterial,
     		light = [],
     		cloud = [
-			   new Cloud(7200, -100, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(1200, 300, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(2600, 200, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(3200, -800, -10, 0, 0x00ffff, 1.0, 3.0, 10),
-			   new Cloud(4200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(5900, -1800, -10, 0, 0x0000ff, 1.0, 2.0, 30),
-			   new Cloud(1500, -700, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(7200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(2200, -800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(1200, 350, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(4200, -570, -4, 0, 0x0000ff, 1.0, 3.0, 43),
-			   new Cloud(8600, 900, -10, 0, 0x0000ff, 1.0, 3.0, 30),
-			   new Cloud(5400, -650, -10, 0, 0x0000ff, 1.0, 3.0, 20),
-			   new Cloud(2500, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(6200, -470, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(7000, -800, -10, 0, 0xffffff, 1.0, 3.0, 10),
-			   new Cloud(9200, -600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(1300, 800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(2500, -890, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(3400, 800, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(9500, 700, -10, 0, 0xff00ff, 1.0, 3.0, 10),
-			   new Cloud(5100, -800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(6000, 940, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(8400, -800, -10,0, 0x0000ff, 1.0, 3.0, 18),
-			   new Cloud(9500, -590, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(1900, 800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(2400, 790, -10, 0, 0x00ffff, 5.0, 3.0, 10),
-			   new Cloud(7300, -800, -4,0, 0x0000ff, 1.0, 3.0, 60),
-			   new Cloud(4800, 470, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(5300, 100, -10, 0, 0x0000ff, 1.0, 3.0, 40),
-			   new Cloud(9400, -590, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(7000, 400, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			   new Cloud(9800, 500, -4, 0, 0x00ff00, 1.0, 3.0, 10),
-			   new Cloud(8500, 670, -4, 0, 0x00ff00, 1.0, 3.0, 10),
-			   new Cloud(400, 790, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(-400, -780, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(-200, 390, -10, 0, 0xff0000, 5.0, 3.0, 10),
-			   new Cloud(-300, -720, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(-100, -380, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(10400, 900, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(12400, -940, 0, 0, 0x00ffff, 7.0, 3.0, 10),
-			   new Cloud(14400, -450, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(12700, 780, 0, 0, 0x0000ff, 9.0, 3.0, 10),
-			   new Cloud(19300, 460, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(15600, -960, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(18900, 320, 0, 0, 0x0000ff, 2.0, 3.0, 10),
-			   new Cloud(14200, -700, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			   new Cloud(12890, -567, 0,0, 0x00ff00, 3.0, 3.0, 10),
-			   new Cloud(13650, 356, 0, 0, 0xff00ff, 6.0, 3.0, 10),
-			   new Cloud(15900, -743, 0, 0, 0x0000ff, 4.0, 3.0, 10),
+			new Cloud(7200, -100, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(1200, 300, -10, 0, 0xff00, 1.0, 3.0, 10),
+               new Cloud(2600, 200, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(3200, -800, -10, 0, 0xffffff, 1.0, 3.0, 10),
+               new Cloud(4200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(5900, -800, -10, 0, 0x0000ff, 1.0, 2.0, 30),
+               new Cloud(1500, -700, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(2200, -800, -10, 0, 0xff00, 1.0, 3.0, 10),
+               new Cloud(1200, 350, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(4200, -570, -4, 0, 0x0000ff, 1.0, 3.0, 43),
+               new Cloud(8600, 900, -10, 0, 0x0000ff, 1.0, 3.0, 30),
+               new Cloud(5400, -650, -10, 0, 0x0000ff, 1.0, 3.0, 20),
+               new Cloud(2500, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(6200, -470, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7000, -800, -10, 0, 0xffffff, 1.0, 3.0, 10),
+               new Cloud(9200, -600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(1300, 800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(2500, -890, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(3400, 800, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(9500, 700, -10, 0, 0xff00ff, 1.0, 3.0, 10),
+               new Cloud(5100, -800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(6000, 940, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(8400, -800, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(9500, -590, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(1900, 800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(2400, 790, -10, 0, 0x00ffff, 5.0, 3.0, 10),
+               new Cloud(7300, -800, -4,0, 0x0000ff, 1.0, 3.0, 60),
+               new Cloud(4800, 470, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(5300, 100, -10, 0, 0x0000ff, 1.0, 3.0, 40),
+               new Cloud(9400, -590, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7000, 400, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(9800, 500, -4, 0, 0x00ff00, 1.0, 3.0, 10),
+               new Cloud(8500, 670, -4, 0, 0x00ff00, 1.0, 3.0, 10),
+               new Cloud(400, 790, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(-400, -780, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(-200, 390, -10, 0, 0xff0000, 5.0, 3.0, 10),
+               new Cloud(-300, -720, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(-100, -380, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(10400, 900, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(12400, -940, 0, 0, 0x00ffff, 7.0, 3.0, 10),
+               new Cloud(14400, -450, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(12700, 780, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+               new Cloud(19300, 460, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(15600, -960, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(18900, 320, 0, 0, 0x0000ff, 2.0, 3.0, 10),
+               new Cloud(14200, -700, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+               new Cloud(12890, -567, 0,0, 0x00ff00, 3.0, 3.0, 10),
+               new Cloud(13650, 356, 0, 0, 0xff00ff, 6.0, 3.0, 10),
+               new Cloud(15900, -743, 0, 0, 0x0000ff, 4.0, 3.0, 10),
+               new Cloud(12700, 780, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+               new Cloud(12500, 540, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+               new Cloud(12659, 600, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+               new Cloud(12489, 749, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+               new Cloud(12298, 593, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+               new Cloud(12500, 493, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+               new Cloud(7500, 400, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7400, 500, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7600, 583, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7749, 639, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7493, 459, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7821, 463, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7948, 470, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(7392, 592, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(6592, 692, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(8598, -500, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(8456, 400, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(8772, -600, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(8982, -887, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(8692, 620, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(8293, -593, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(8150, 800, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(8382, -692, -10,0, 0x0000ff, 1.0, 3.0, 18),
+               new Cloud(14000, -400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(14500, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(14300, -600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(14200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(14600, -400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(14900, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(14500, -583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+               new Cloud(14800, 583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
 			    
 			];
 
@@ -174,15 +205,17 @@
 					} else {
 						sp.position.x += cloud[c].dx;
 						sp.position.y += cloud[c].dy;
-						cam.position.x += 0.05;
-						player.position.x += 0.05;
+						cam.position.x += 0.02;
+						player.position.x += 0.02;
 						min_delta = 20;
 						document.getElementById("hud").innerHTML = "";
 					}
 				});
 			
 				if(player.position.x > 20000) {
-					alert("WIN level one");
+					    document.getElementById("hud").innerHTML = "WIN!";
+						document.getElementById("hud").style.color = "red";
+						document.getElementById("hud").style.fontSize = "64px";
 				}
 			}
 
