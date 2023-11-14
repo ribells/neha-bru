@@ -8,6 +8,11 @@
 </head>
 <body>
 	<div id="container"></div>
+    <div id="hud" style="z-index:2;top:20px;left:100px;position:absolute">
+		HERE IS THE STARTING INFORMATION:<br/>
+         USE the W and S keys to avoid the clouds while flying<br/>
+		 Reach the end without hitting the clouds to win
+	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/Detector.js"></script>
 	<script src="js/OrbitControls.js"></script>
@@ -25,13 +30,18 @@
 	<div id="ThreeJS" style="position: absolute; left:px; top:0px"></div>
 
 	<script>
+	var player = "";
+	var arms = "";
+	var arms_direction = 1;
+	var legs = "";
+	var legs_direction = 1;
 	
 	class Cloud {
 	  constructor(x, y, dx, dy, color, intensity, falloff, num_particles) {
-		this.x = x;
+		this.x = x - 600;
 		this.y = y;
-		this.dx = x;
-		this.dy = y;
+		this.dx = dx;
+		this.dy = dy;
 		this.color = color;
 		this.intensity = intensity;
 		this.falloff = falloff;
@@ -40,23 +50,37 @@
 	  }
 	}
 	
-	class Blockhead {
-	  constructor(x, y, z, scale, model) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.scale = scale;
-		this.model = model;
-	  }
-	}
+	function setupKeyControls() {
+      document.onkeydown = function(e) {
+        switch (e.keyCode) {
+          case 65: //a
+          player.position.x -= 25;
+          arms.position.x = player.position.x;
+          legs.position.x = player.position.x;
+          break;
+          case 68: //d
+          player.position.x += 25;
+          arms.position.x = player.position.x;
+          legs.position.x = player.position.x;
+          break;
+          case 83: //s
+          player.position.y -= 25;
+          arms.position.y = player.position.y;
+          legs.position.y = player.position.y;
+          break;
+          case 87: //w
+          player.position.y += 25;
+          arms.position.y = player.position.y;
+          legs.position.y = player.position.y;
+          break;
+        }
+      };
+    }
 	
 	// MAIN
 	let cam, scene, renderer, controls, clock, cloudMaterial,
 		h, w, dx, dy,
 		light = [],
-		bhead = [
-			new Blockhead(0, 0, 1400, 100, ""),
-		],
 		cloud = [
 			new Cloud(7200, -100, -10, 0, 0x0000ff, 1.0, 3.0, 10),
                new Cloud(1200, 300, -10, 0, 0xff00, 1.0, 3.0, 10),
@@ -140,137 +164,230 @@
                new Cloud(14500, -583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
                new Cloud(14800, 583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
 		];
+		
+		function collision(x, y, z, x1, y1, z1, t) {
+			if(Math.sqrt((x-x1)*(x-x1) + (y-y1)*(y-y1) + (z-z1)*(z-z1)) < t) {
+				return true;
+			} else {
+				return false;
+			}
+		}
 
-	const animate = () => {
-        let delta = clock.getDelta();
+		let lastTime;
+		let delta = 0;
+		let min_delta = 20.0;
+	
+		const animate = (time) => {	
+	
+			if (lastTime != null) {
+				delta += time - lastTime
+				console.log(delta)
+			}
+			lastTime = time;
+			requestAnimationFrame(animate);
+			
+			if(delta > min_delta) {
+				delta = 0;
+				let collided = false;
+				
+				//check for collision
+				for (c=0; c<cloud.length; c++) {
 
-        requestAnimationFrame(animate);
-        
-        for (c=0; c<cloud.length; c++) {
-		    dx = Math.random()*.5-0.25;
-        	dy = Math.random()*.5-0.25;
-
-			[].forEach.call(cloud[c].cloudParticles, sp => {
-				sp.rotation.z = sp.rotation.z += delta * 0.2;
-				sp.rotation.y = cam.rotation.y;
-				sp.rotation.x = cam.rotation.x;
-				sp.position.x += dx;
-				sp.position.y += dy;
-			});
-        }
-        
-        controls.update();
-
-        renderer.render(scene, cam);
-    },
-    resize = () => {
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    },
-    lights = () => {
-        clock = new THREE.Clock();
-
-        renderer = new THREE.WebGLRenderer();
-        renderer.setClearColor(0x00d0ff, 1.0);
-        renderer.setSize(w, h);
-
-        scene = new THREE.Scene();
-        
-        var dlight = new THREE.DirectionalLight(0x0000ff, 1.0);
-        scene.add(dlight);
-
-    	for (c=0; c<cloud.length; c++) {
-    		light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
-    		light[c].position.set(cloud[c].x+100, cloud[c].y+100, 200);
-    		scene.add(light[c]);
-    		light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
-    		light[c].position.set(cloud[c].x-100, cloud[c].y-100, 1200);
-    		scene.add(light[c]);
-    	}
-    	
-    	dlight.target = light[0];
-    },
-    camera = () => {
-        cam = new THREE.PerspectiveCamera(75, w / h, 1, 10000);
-        cam.position.z = 2500;
-
-        scene.add(cam);
-    },
-    action = () => {
-        const loader = new THREE.TextureLoader();
-
-        loader.crossOrigin = '';
-
-        loader.load(
-            white,
-            function onLoad(texture) {
-                const cloudGeo = new THREE.PlaneBufferGeometry(400, 400);
-
-                cloudMaterial = new THREE.MeshLambertMaterial({
-                    map: texture,
-                    color: 0xffffff,
-                    emissive: 0xffffff,
-                    emissiveIntensity: 0.3,
-                    transparent: true
-                });
-                
-                for (c=0; c<cloud.length; c++) {
-					for (let p = 0, l = cloud[c].num_particles; p < l; p++) {
-						let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
-
-						particle.position.set(
-							Math.random() * 1000 - 100,
-							Math.random() * 300 + cloud[c].y,
-							Math.random() * 500 - cloud[c].x
-						);
-
-						particle.rotation.z = Math.random() * 360;
-						scene.add(particle);
-						cloud[c].cloudParticles.push(particle);
+					[].forEach.call(cloud[c].cloudParticles, sp => {
+						sp.rotation.z += 0.01;
+			   			if(player != "") {
+							if(collision(sp.position.x, sp.position.y, sp.position.z, player.position.x, player.position.y, player.position.z, 50)) {
+								collided = true;
+								document.getElementById("hud").innerHTML = "COLLISION!";
+								document.getElementById("hud").style.color = "red";
+								document.getElementById("hud").style.fontSize = "64px";
+								min_delta = 1000;
+							}
+						}
+					});
+				}
+		
+				for (c=0; c<cloud.length; c++) {
+					[].forEach.call(cloud[c].cloudParticles, sp => {
+						sp.rotation.z = sp.rotation.z += delta * 0.2;
+						if(collided) {
+							for (c=0; c<cloud.length; c++) {
+								cloud[c].x -= (player.position.x + 1000);
+								sp.position.x -= (player.position.x + 1000);
+								sp.position.z = 400;
+								sp.position.y = 0;
+							}
+						} else {
+							sp.rotation.y = cam.rotation.y;
+							sp.rotation.x = cam.rotation.x;
+							sp.position.z -= cloud[c].dx/5;
+							sp.position.y += cloud[c].dy/5;
+							min_delta = 20;
+							document.getElementById("hud").innerHTML = "";
+						}
+					});
+				}
+		
+				if(player != "" && arms != "" && legs != "") {
+					arms.position.y = player.position.y;
+					arms.position.x = player.position.x;
+					arms.rotation.z += 0.1 * arms_direction;
+					if(arms.rotation.z > 3.7) {
+						arms_direction = -1;
+					} else if(arms.rotation.z < 2.5) {
+						arms_direction = 1;
 					}
-                }
-                animate();
-            }
-        );
-        
-    	//load blockheads
-    	var bhead_model = "";
-    	var idx = 0;
-		for(bno=0; bno<bhead.length; bno++) {
-		  bhead_model = this;
-		  var glloader = new THREE.GLTFLoader();
-		  glloader.load(
-			"blockhead.glb",
-			 function ( gltf ) {
-			   bhead_model = gltf.scene; 
-			   bhead_model.rotation.set ( Math.PI, 0, Math.PI );
-			   bhead_model.position.set ( bhead[idx].x, bhead[idx].y, bhead[idx].z );
-			   bhead_model.scale.set (bhead[idx].scale, bhead[idx].scale, bhead[idx].scale);
-			   bhead[idx].model = bhead_model;
-			   scene.add(bhead_model);
-			   idx++;
-			 }
-		  );	
-		}	
-    },
-    main = () => {
-        h = window.innerHeight;
-        w = window.innerWidth;
-        
-        lights();
-        camera();
-        action();
-        
-		// CONTROLS
-		controls = new THREE.TrackballControls( cam );
-		controls.rotateSpeed = 1;
-		controls.noPan = false;
-		controls.target.set(0, 0, 0);
+					legs.position.y = player.position.y;
+					legs.position.x = player.position.x;
+					legs.rotation.z += 0.1 * legs_direction;
+					if(legs.rotation.z > 3.7) {
+						legs_direction = -1;
+					} else if(legs.rotation.z < 2.5) {
+						legs_direction = 1;
+					}
+	
+					console.log(cam.position.z);
+	
+					if(player.position.x > 20000) {
+							document.getElementById("hud").innerHTML = "WIN!";
+							document.getElementById("hud").style.color = "red";
+							document.getElementById("hud").style.fontSize = "64px";
+					}
+				}
+			}
+				
+			controls.update();
 
-        document.body.appendChild(renderer.domElement);
-        window.addEventListener('resize', resize);
-    };
+			renderer.render(scene, cam);
+		},
+		resize = () => {
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		},
+		lights = () => {
+			clock = new THREE.Clock();
 
-	main();
+			renderer = new THREE.WebGLRenderer();
+			renderer.setClearColor(0x00d0ff, 1.0);
+			renderer.setSize(w, h);
+
+			scene = new THREE.Scene();
+		
+			var dlight = new THREE.DirectionalLight(0x0000ff, 1.0);
+			scene.add(dlight);
+
+			for (c=0; c<cloud.length; c++) {
+				light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
+				light[c].position.set(cloud[c].x+100, cloud[c].y+100, 200);
+				scene.add(light[c]);
+				light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
+				light[c].position.set(cloud[c].x-100, cloud[c].y-100, 1200);
+				scene.add(light[c]);
+			}
+		
+			dlight.target = light[0];
+		},
+		camera = () => {
+			cam = new THREE.PerspectiveCamera(75, w / h, 1, 10000);
+			cam.position.z = 2500;
+
+			scene.add(cam);
+		},
+		action = () => {
+			const loader = new THREE.TextureLoader();
+		
+			//load the player
+			//player = this;
+			var glloader = new THREE.GLTFLoader();
+			glloader.load(
+			  "b_block.glb",
+			   function ( gltf ) {
+				 player = gltf.scene;
+				 player.rotation.set (Math.PI, 0, Math.PI);
+				 player.position.set (500, 0, 400);
+				 player.scale.set (360, 360, 360);
+				 scene.add(player);
+			   }
+			);
+		
+			//arms = this;
+			glloader.load(
+			  "b_arms.glb",
+			   function ( gltf ) {
+				 arms = gltf.scene;
+				 arms.rotation.set (Math.PI, 0, Math.PI);
+				 arms.position.set (500, 0, 400);
+				 arms.scale.set (360, 360, 360);
+				 scene.add(arms);
+			   }
+			);
+		
+			//legs = this;
+			glloader.load(
+			  "b_legs.glb",
+			   function ( gltf ) {
+				 legs = gltf.scene;
+				 legs.rotation.set (3.4, 0, 2.8);
+				 legs.position.set (500, 0, 400);
+				 legs.scale.set (360, 360, 360);
+				 scene.add(legs);
+			   }
+			);	
+ 
+			loader.crossOrigin = '';
+
+			loader.load(
+				white,
+				function onLoad(texture) {
+					const cloudGeo = new THREE.PlaneBufferGeometry(400, 400);
+
+					cloudMaterial = new THREE.MeshLambertMaterial({
+						map: texture,
+						color: 0xffffff,
+						emissive: 0xffffff,
+						emissiveIntensity: 0.3,
+						transparent: true
+					});
+				
+					for (c=0; c<cloud.length; c++) {
+						for (let p = 0, l = cloud[c].num_particles; p < l; p++) {
+							let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
+
+							particle.position.set(
+								Math.random() * 2000 - 1000,
+								Math.random() * 300 + cloud[c].y,
+								Math.random() * 500 - cloud[c].x
+							);
+
+							particle.rotation.z = Math.random() * 360;
+							scene.add(particle);
+							cloud[c].cloudParticles.push(particle);
+						}
+					}
+					animate();
+				}
+			);        
+		},
+		main = () => {
+			h = window.innerHeight;
+			w = window.innerWidth;
+		
+			lights();
+			camera();
+			action();
+		
+			// CONTROLS
+			controls = new THREE.TrackballControls( cam );
+			controls.rotateSpeed = 1;
+			controls.noPan = false;
+			controls.target.set(0, 0, 0);
+
+			document.body.appendChild(renderer.domElement);
+			window.addEventListener('resize', resize);
+		
+			setupKeyControls();
+		};
+
+		main();
 
 	</script>
 </body>
