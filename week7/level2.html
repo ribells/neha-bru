@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Blockhead's Cloud Game</title>
+	<meta charset="utf-8">
+	<!-- see https://tympanus.net/Tutorials/ProceduralClouds/-->
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+	<div id="container"></div>
+    <div id="hud" style="z-index:2;top:20px;left:100px;position:absolute">
+		 HERE IS THE STARTING INFORMATION:<br/>
+         USE the W and S keys to avoid the clouds while flying<br/>
+		 Reach the end without hitting the clouds to win
+	</div>
+	<script src="js/three.min.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/GLTFLoader.js"></script>
+	<script src="js/THREEx.KeyboardState.js"></script>
+	<script src="js/THREEx.FullScreen.js"></script>
+	<script src="js/THREEx.WindowResize.js"></script>
+	<script src="js/TrackballControls.js"></script>
+	<script src="js/jquery-1.9.1.js"></script>
+
+     <!-- image converter available at: https://www.base64-image.de/ -->
+	<script src="images/blue.js"></script>
+	<script src="images/white.js"></script>
+
+	<div id="ThreeJS" style="position: absolute; left:px; top:0px"></div>
+
+	<script>
+	var player = "";
+	var arms = "";
+	var arms_direction = 1;
+	var legs = "";
+	var legs_direction = 1;
+	var finish_line = "";
+	
+	var instructions_loaded = false;
+	
+	class Cloud {
+	  constructor(x, y, dx, dy, color, intensity, falloff, num_particles) {
+		this.x = x - 600;
+		this.y = y;
+		this.dx = dx;
+		this.dy = dy;
+		this.color = color;
+		this.intensity = intensity;
+		this.falloff = falloff;
+		this.num_particles = num_particles;
+		this.cloudParticles = [];
+	  }
+	}
+	
+	function setupKeyControls() {
+      document.onkeydown = function(e) {
+        switch (e.keyCode) {
+          case 65: //a
+          player.position.x -= 25;
+          arms.position.x = player.position.x;
+          legs.position.x = player.position.x;
+          break;
+          case 68: //d
+          player.position.x += 25;
+          arms.position.x = player.position.x;
+          legs.position.x = player.position.x;
+          break;
+          case 83: //s
+          player.position.y -= 25;
+          arms.position.y = player.position.y;
+          legs.position.y = player.position.y;
+          break;
+          case 87: //w
+          player.position.y += 25;
+          arms.position.y = player.position.y;
+          legs.position.y = player.position.y;
+          break;
+        }
+      };
+    }
+	
+	// MAIN
+	let cam, scene, renderer, controls, clock, cloudMaterial,
+		h, w, dx, dy,
+		light = [],
+		cloud = [
+			new Cloud(7200, -100, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(1200, 300, -10, 0, 0xff00, 1.0, 3.0, 10),
+			new Cloud(2600, 200, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(3200, -800, -10, 0, 0xffffff, 1.0, 3.0, 10),
+			new Cloud(4200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(5900, -800, -10, 0, 0x0000ff, 1.0, 2.0, 30),
+			new Cloud(1500, -700, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(2200, -800, -10, 0, 0xff00, 1.0, 3.0, 10),
+			new Cloud(1200, 350, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(4200, -570, -4, 0, 0x0000ff, 1.0, 3.0, 43),
+			new Cloud(8600, 900, -10, 0, 0x0000ff, 1.0, 3.0, 30),
+			new Cloud(5400, -650, -10, 0, 0x0000ff, 1.0, 3.0, 20),
+			new Cloud(2500, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(6200, -470, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7000, -800, -10, 0, 0xffffff, 1.0, 3.0, 10),
+			new Cloud(9200, -600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(1300, 800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(2500, -890, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(3400, 800, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(9500, 700, -10, 0, 0xff00ff, 1.0, 3.0, 10),
+			new Cloud(5100, -800, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(6000, 940, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(8400, -800, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(9500, -590, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(1900, 800, -10, 0, 0xff00ff, 1.0, 3.0, 10),
+			new Cloud(2400, 790, -10, 0, 0x00ffff, 5.0, 3.0, 10),
+			new Cloud(7300, -800, -4,0, 0x0000ff, 1.0, 3.0, 60),
+			new Cloud(4800, 470, -10, 0, 0x00ffff, 1.0, 3.0, 10),
+			new Cloud(5300, 100, -10, 0, 0x0000ff, 1.0, 3.0, 40),
+			new Cloud(9400, -590, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7000, 400, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(9800, 500, -4, 0, 0xffff00, 1.0, 3.0, 10),
+			new Cloud(8500, 670, -4, 0, 0x00ff00, 1.0, 3.0, 10),
+			new Cloud(400, 790, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(-400, -780, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(-200, 390, -10, 0, 0xff0000, 5.0, 3.0, 10),
+			new Cloud(-300, -720, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(-100, -380, -10, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(10400, 900, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(12400, -940, 0, 0, 0x00ffff, 7.0, 3.0, 10),
+			new Cloud(14400, -450, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(12700, 780, 0, 0, 0x00ff00, 9.0, 3.0, 10),
+			new Cloud(19300, 460, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(15600, -960, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(18900, 320, 0, 0, 0x00ff00, 2.0, 3.0, 10),
+			new Cloud(14200, -700, 0, 0, 0x0000ff, 5.0, 3.0, 10),
+			new Cloud(12890, -567, 0,0, 0x00ff00, 3.0, 3.0, 10),
+			new Cloud(13650, 356, 0, 0, 0xff00ff, 6.0, 3.0, 10),
+			new Cloud(15900, -743, 0, 0, 0x0000ff, 4.0, 3.0, 10),
+			new Cloud(12700, 780, 0, 0, 0x00ff00, 9.0, 3.0, 10),
+			new Cloud(12500, 540, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+			new Cloud(12659, 600, 0, 0, 0xff00ff, 9.0, 3.0, 10),
+			new Cloud(12489, 749, 0, 0, 0x00ff00, 9.0, 3.0, 10),
+			new Cloud(12298, 593, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+			new Cloud(12500, 493, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+			new Cloud(7500, 400, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7400, 500, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7600, 583, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7749, 639, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7493, 459, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7821, 463, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7948, 470, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(7392, 592, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(6592, 692, -4, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(8598, -500, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(8456, 400, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(8772, -600, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(8982, -887, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(8692, 620, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(8293, -593, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(8150, 800, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(8382, -692, -10,0, 0x0000ff, 1.0, 3.0, 18),
+			new Cloud(14000, -400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14500, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14300, -600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14600, -400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14900, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14500, -583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14800, 583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+		];
+		
+		function collision(x, y, z, x1, y1, z1, t) {
+			if(Math.sqrt((x-x1)*(x-x1) + (y-y1)*(y-y1) + (z-z1)*(z-z1)) < t) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		let lastTime;
+		let delta = 0;
+		let min_delta = 20.0;
+	
+		const animate = (time) => {	
+	
+			if (lastTime != null) {
+				delta += time - lastTime
+				console.log(delta)
+			}
+			lastTime = time;
+			requestAnimationFrame(animate);
+			
+			if(delta > min_delta) {
+				delta = 0;
+				let collided = false;
+				
+				//check for collision
+				for (c=0; c<cloud.length; c++) {
+
+					[].forEach.call(cloud[c].cloudParticles, sp => {
+						sp.rotation.z += 0.01;
+			   			if(player != "") {
+							if(collision(sp.position.z, sp.position.y, sp.position.x, player.position.x, player.position.y, player.position.z, 50)) {
+								collided = true;
+								document.getElementById("hud").innerHTML = "COLLISION!";
+								document.getElementById("hud").style.color = "red";
+								document.getElementById("hud").style.fontSize = "64px";
+								min_delta = 1000;
+							}
+						}
+					});
+				}
+		
+				for (c=0; c<cloud.length; c++) {
+					[].forEach.call(cloud[c].cloudParticles, sp => {
+						sp.rotation.z = sp.rotation.z += delta * 0.2;
+						if(collided) {
+							for (c=0; c<cloud.length; c++) {
+								cloud[c].x -= (player.position.x + 1000);
+								sp.position.x -= (player.position.x + 1000);
+								sp.position.z = 400;
+								sp.position.y = 0;
+							}
+						} else {
+							sp.rotation.y = cam.rotation.y;
+							sp.rotation.x = cam.rotation.x;
+							sp.position.z -= cloud[c].dx/5;
+							sp.position.y += cloud[c].dy/5;
+							min_delta = 20;
+							document.getElementById("hud").innerHTML = "";
+						}
+					});
+
+					light[c].position.z -= cloud[c].dx/5;
+					light[c].position.y += cloud[c].dy/5;
+				}
+		
+				if(player != "" && arms != "" && legs != "") {
+					if(instructions_loaded == false ) {
+						document.getElementById("hud").innerHTML = "HERE IS THE STARTING INFORMATION:<br/>USE the W and S keys to avoid the clouds while flying<br/>Reach the end without hitting the clouds to win";
+						document.getElementById("hud").style.color = "black";
+						document.getElementById("hud").style.fontSize = "24px";
+						instuctions_loaded = true;
+					}
+	
+					arms.position.y = player.position.y;
+					arms.position.x = player.position.x;
+					arms.rotation.z += 0.2 * arms_direction;
+					if(arms.rotation.z > 3.7) {
+						arms_direction = -1;
+					} else if(arms.rotation.z < 2.5) {
+						arms_direction = 1;
+					}
+
+					legs.position.y = player.position.y;
+					legs.position.x = player.position.x;
+					legs.rotation.z += 0.1 * legs_direction;
+					if(legs.rotation.z > 3.7) {
+						legs_direction = -1;
+					} else if(legs.rotation.z < 2.5) {
+						legs_direction = 1;
+					}
+	
+					console.log(cam.position.z);
+	
+					if(finish_line.position.z > 400) {
+						document.getElementById("hud").innerHTML = "WIN!";
+						document.getElementById("hud").style.color = "red";
+						document.getElementById("hud").style.fontSize = "64px";
+					}
+					finish_line.position.z += 10;
+				}
+			}
+				
+			controls.update();
+
+			renderer.render(scene, cam);
+		},
+		resize = () => {
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		},
+		lights = () => {
+			clock = new THREE.Clock();
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setClearColor(0x00d0ff, 1.0);
+			renderer.setSize(w, h);
+
+			scene = new THREE.Scene();
+		
+			var dlight = new THREE.DirectionalLight(0xffffff, 1.0);
+			dlight.rotation.set(0, Math.PI, 0);
+			scene.add(dlight);
+
+			for (c=0; c<cloud.length; c++) {
+				light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
+				light[c].position.set(200, cloud[c].y+100, cloud[c].x+100);
+				scene.add(light[c]);
+				light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 0, cloud[c].falloff));
+				light[c].position.set(1200, cloud[c].y-100, cloud[c].x-100);
+				scene.add(light[c]);
+			}
+		
+			dlight.target = light[0];
+		},
+		camera = () => {
+			cam = new THREE.PerspectiveCamera(75, w / h, 1, 10000);
+			cam.position.z = 2500;
+
+			scene.add(cam);
+		},
+		action = () => {
+			const loader = new THREE.TextureLoader();
+		
+			//load the player
+			var glloader = new THREE.GLTFLoader();
+			
+			//body
+			glloader.load(
+			  "b_block.glb",
+			   function ( gltf ) {
+				 player = gltf.scene;
+				 player.rotation.set (Math.PI, 0, Math.PI);
+				 player.position.set (0, 0, 400);
+				 player.scale.set (360, 360, 360);
+				 scene.add(player);
+			   }
+			);
+		
+			//arms
+			glloader.load(
+			  "b_arms.glb",
+			   function ( gltf ) {
+				 arms = gltf.scene;
+				 arms.rotation.set (Math.PI, 0, Math.PI);
+				 arms.position.set (0, 0, 400);
+				 arms.scale.set (360, 360, 360);
+				 scene.add(arms);
+			   }
+			);
+			
+			//legs
+			glloader.load(
+			  "b_legs.glb",
+			   function ( gltf ) {
+				 legs = gltf.scene;
+				 legs.rotation.set (3.4, 0, 2.8);
+				 legs.position.set (0, 0, 400);
+				 legs.scale.set (360, 360, 360);
+				 scene.add(legs);
+			   }
+			);
+			
+			//finish line
+			glloader.load(
+			  "finish line.glb",
+			   function ( gltf ) {
+				 finish_line = gltf.scene;
+				 finish_line.rotation.set ( 0, Math.PI/2, 0 );
+				 finish_line.position.set (0, 0, -20000);
+				 finish_line.scale.set (20, 20, 20);
+				 scene.add(finish_line);
+			   }
+			);
+ 
+			loader.crossOrigin = '';
+
+			loader.load(
+				white,
+				function onLoad(texture) {
+					const cloudGeo = new THREE.PlaneBufferGeometry(400, 400);
+
+					cloudMaterial = new THREE.MeshLambertMaterial({
+						map: texture,
+						color: 0xffffff,
+						emissive: 0xffffff,
+						emissiveIntensity: 0.3,
+						transparent: true
+					});
+				
+					for (c=0; c<cloud.length; c++) {
+						for (let p = 0, l = cloud[c].num_particles; p < l; p++) {
+							let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
+
+							particle.position.set(
+								Math.random() * 2000 - 1000,
+								Math.random() * 300 + cloud[c].y,
+								Math.random() * 500 - cloud[c].x
+							);
+
+							particle.rotation.x = Math.random() * 360;
+							scene.add(particle);
+							cloud[c].cloudParticles.push(particle);
+						}
+					}
+					animate();
+				}
+			);        
+		},
+		main = () => {
+			h = window.innerHeight;
+			w = window.innerWidth;
+		
+			lights();
+			camera();
+			action();
+		
+			// CONTROLS
+			controls = new THREE.TrackballControls( cam );
+			controls.rotateSpeed = 1;
+			controls.noPan = false;
+			controls.target.set(0, 0, 0);
+
+			document.body.appendChild(renderer.domElement);
+			window.addEventListener('resize', resize);
+		
+			setupKeyControls();
+		};
+
+		main();
+
+	</script>
+</body>
+</html>
