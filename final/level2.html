@@ -42,8 +42,9 @@
 	
 	class Cloud {
 	  constructor(x, y, dx, dy, color, intensity, falloff, num_particles) {
-		this.x = x - 600;
+		this.x = x;
 		this.y = y;
+		this.z = Math.random()*2000-1000;
 		this.dx = dx;
 		this.dy = dy;
 		this.color = color;
@@ -87,15 +88,15 @@
 		light = [],
 		cloud = [
 			new Cloud(7200, -100, -10, 0, 0xFF69B4, 1.0, 3.0, 10),
-			new Cloud(1200, 300, -10, 0, 0xff00, 1.0, 3.0, 10),
+			new Cloud(1200, 300, -10, 0, 0x00ff00, 1.0, 3.0, 10),
 			new Cloud(2600, 200, -4, 0, 0x0000ff, 1.0, 3.0, 10),
-			new Cloud(3200, -800, -10, 0, 0xffffff, 1.0, 3.0, 10),
+			new Cloud(3200, -800, -10, 0, 0x00ff00, 1.0, 3.0, 10),
 			new Cloud(4200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(5900, -800, -10, 0, 0x0000ff, 1.0, 2.0, 30),
 			new Cloud(1500, -700, -4, 0, 0xFF69B4, 1.0, 3.0, 10),
 			new Cloud(7200, 600, -10, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(2200, -800, -10, 0, 0xff00, 1.0, 3.0, 10),
-			new Cloud(1200, 350, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(1300, 350, -10, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(4200, -570, -4, 0, 0x0000ff, 1.0, 3.0, 43),
 			new Cloud(8600, 900, -10, 0, 0x0000ff, 1.0, 3.0, 30),
 			new Cloud(5400, -650, -10, 0, 0xC8A2C8, 1.0, 3.0, 20),
@@ -112,7 +113,7 @@
 			new Cloud(8400, -800, -10,0, 0x0000ff, 1.0, 3.0, 18),
 			new Cloud(9500, -590, -4, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(1900, 800, -10, 0, 0xff00ff, 1.0, 3.0, 10),
-			new Cloud(2400, 790, -10, 0, 0x00ffff, 5.0, 3.0, 10),
+			new Cloud(2400, 790, -10, 0, 0x00ffff, 0.5, 3.0, 10),
 			new Cloud(7300, -800, -4,0, 0x0000ff, 1.0, 3.0, 60),
 			new Cloud(4800, 470, -10, 0, 0x00ffff, 1.0, 3.0, 10),
 			new Cloud(5300, 100, -10, 0, 0xFF69B4, 1.0, 3.0, 40),
@@ -120,28 +121,28 @@
 			new Cloud(7000, 400, -4, 0, 0xC8A2C8, 1.0, 3.0, 10),
 			new Cloud(9800, 500, -4, 0, 0xffff00, 1.0, 3.0, 10),
 			new Cloud(8500, 670, -4, 0, 0x00ff00, 1.0, 3.0, 10),
-			new Cloud(400, 790, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(-400, -780, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(-200, 390, -10, 0, 0xff0000, 5.0, 3.0, 10),
-			new Cloud(-300, -720, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(-100, -380, -10, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(10400, 900, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(12400, -940, 0, 0, 0x00ffff, 7.0, 3.0, 10),
-			new Cloud(14400, -450, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(12700, 780, 0, 0, 0x00ff00, 9.0, 3.0, 10),
-			new Cloud(19300, 460, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(15600, -960, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(18900, 320, 0, 0, 0xFF69B4, 2.0, 3.0, 10),
-			new Cloud(14200, -700, 0, 0, 0x0000ff, 5.0, 3.0, 10),
-			new Cloud(12890, -567, 0,0, 0x00ff00, 3.0, 3.0, 10),
-			new Cloud(13650, 356, 0, 0, 0xff00ff, 6.0, 3.0, 10),
-			new Cloud(15900, -743, 0, 0, 0x0000ff, 4.0, 3.0, 10),
-			new Cloud(12700, 780, 0, 0, 0x00ff00, 9.0, 3.0, 10),
-			new Cloud(12500, 540, 0, 0, 0x0000ff, 9.0, 3.0, 10),
-			new Cloud(12659, 600, 0, 0, 0xC8A2C8, 9.0, 3.0, 10),
-			new Cloud(12489, 749, 0, 0, 0x00ff00, 9.0, 3.0, 10),
-			new Cloud(12298, 593, 0, 0, 0xFF69B4f, 9.0, 3.0, 10),
-			new Cloud(12500, 493, 0, 0, 0x0000ff, 9.0, 3.0, 10),
+			new Cloud(400, 790, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(4200, -780, -10, 0, 0x0000ff, 0.5, 3.0, 10),
+			new Cloud(1200, 390, -10, 0, 0xff0000, 1.0, 3.0, 10),
+			new Cloud(6300, -720, -10, 0, 0x0000ff, 0.5, 3.0, 10),
+			new Cloud(2100, -380, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(10400, 900, 0, 0, 0x0000ff, 0.5, 3.0, 10),
+			new Cloud(12400, -940, 0, 0, 0x00ffff, 0.7, 3.0, 10),
+			new Cloud(14400, -450, 0, 0, 0x0000ff, 0.5, 3.0, 10),
+			new Cloud(12700, 780, 0, 0, 0x00ff00, 0.9, 3.0, 10),
+			new Cloud(19300, 460, 0, 0, 0x0000ff, 0.5, 3.0, 10),
+			new Cloud(15600, -960, 0, 0, 0x0000ff, 0.5, 3.0, 10),
+			new Cloud(18900, 320, 0, 0, 0xFF69B4, 0.2, 3.0, 10),
+			new Cloud(14200, -700, 0, 0, 0x0000ff, 0.5, 3.0, 10),
+			new Cloud(12890, -567, 0,0, 0x00ff00, 0.3, 3.0, 10),
+			new Cloud(13650, 356, 0, 0, 0xff00ff, 0.6, 3.0, 10),
+			new Cloud(15900, -743, 0, 0, 0x0000ff, 0.4, 3.0, 10),
+			new Cloud(12700, 780, 0, 0, 0x00ff00, 0.9, 3.0, 10),
+			new Cloud(12500, 540, 0, 0, 0x0000ff, 0.9, 3.0, 10),
+			new Cloud(12659, 600, 0, 0, 0xC8A2C8, 0.9, 3.0, 10),
+			new Cloud(12489, 749, 0, 0, 0x00ff00, 0.9, 3.0, 10),
+			new Cloud(12298, 593, 0, 0, 0xFF69B4f, 0.9, 3.0, 10),
+			new Cloud(12500, 493, 0, 0, 0x0000ff, 0.9, 3.0, 10),
 			new Cloud(7500, 400, -4, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(7400, 500, -4, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(7600, 583, -4, 0, 0xC8A2C8, 1.0, 3.0, 10),
@@ -166,7 +167,7 @@
 			new Cloud(14600, -400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(14900, 400, -10, 0, 0x0000ff, 1.0, 3.0, 10),
 			new Cloud(14500, -583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
-			new Cloud(14800, 583, -10, 0, 0x0000ff, 1.0, 3.0, 10),
+			new Cloud(14800, 583, -10, 0, 0x0000ff, 1.0, 3.0, 10)
 		];
 		
 		function collision(x, y, z, x1, y1, z1, t) {
@@ -185,7 +186,7 @@
 	
 			if (lastTime != null) {
 				delta += time - lastTime
-				console.log(delta)
+				//console.log(delta)
 			}
 			lastTime = time;
 			requestAnimationFrame(animate);
@@ -224,20 +225,20 @@
 						} else {
 							sp.rotation.y = cam.rotation.y;
 							sp.rotation.x = cam.rotation.x;
-							//sp.position.z -= cloud[c].dx/5;
-							//sp.position.y += cloud[c].dy/5;
+							sp.position.z -= cloud[c].dx/5;
+							sp.position.y += cloud[c].dy/5;
 							min_delta = 20;
 							document.getElementById("hud").innerHTML = "";
 						}
 					});
 
-					//light[c].position.z -= cloud[c].dx/5;
-					//light[c].position.y += cloud[c].dy/5;
+					light[c].position.z -= cloud[c].dx/5;
+					light[c].position.y += cloud[c].dy/5;
 				}
 		
 				if(player != "" && arms != "" && legs != "") {
 					if(instructions_loaded == false ) {
-						document.getElementById("hud").innerHTML = "HERE IS THE STARTING INFORMATION:<br/>USE the W and S keys to avoid the clouds while flying<br/>Reach the end without hitting the clouds to win<br/>You can change the point of view to see different colours";
+						document.getElementById("hud").innerHTML = "Norby got lost on his way and encountered some dangerous looking clouds.<br/>Help him find his way back<br/>HERE IS THE STARTING INFORMATION:<br/>USE the W and S keys to avoid the clouds while flying<br/>Reach the end without hitting the clouds to win";
 						document.getElementById("hud").style.color = "black";
 						document.getElementById("hud").style.fontSize = "24px";
 						instuctions_loaded = true;
@@ -260,8 +261,6 @@
 					} else if(legs.rotation.z < 2.5) {
 						legs_direction = 1;
 					}
-	
-					console.log(cam.position.z);
 	
 					if(finish_line.position.z > 400) {
 						document.getElementById("hud").innerHTML = "WIN! CONGRATULATIONS YOU HAVE WON";
@@ -288,18 +287,16 @@
 
 			scene = new THREE.Scene();
 		
-			var dlight = new THREE.DirectionalLight(0xffffff, 0.5);
-			dlight.rotation.set(0, Math.PI, 0);
-			//scene.add(dlight);
+			var plight = new THREE.PointLight(0xffffff, 1.0, 5000, 3.0);
+			plight.position.set(0, 0, 0);
+			scene.add(plight);
 
 			for (c=0; c<cloud.length; c++)
 			 {
-				light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity/10, 0, cloud[c].falloff));
-				light[c].position.set(2000, cloud[c].y, cloud[c].x);
+				light.push(new THREE.PointLight(cloud[c].color, cloud[c].intensity, 5000, cloud[c].falloff));
+				light[c].position.set(0, cloud[c].y, -cloud[c].x);
 				scene.add(light[c]);
 			}
-		
-			dlight.target = light[0];
 		},
 		camera = () => 
 		{
@@ -383,10 +380,14 @@
 							let particle = new THREE.Mesh(cloudGeo, cloudMaterial);
 
 							particle.position.set(
-								Math.random() * 2000 - 1000,
-								Math.random() * 300 + cloud[c].y - 150,
-								Math.random() * 500 - cloud[c].x - 250
+								Math.random() * 200 + cloud[c].z - 100,
+								Math.random() * 200 + cloud[c].y - 100,
+								Math.random() * 300 - cloud[c].x - 150
 							);
+							
+							if(p==0) {
+								//alert(particle.position.x + "," + particle.position.y + "," + particle.position.z + "," + light[c].position.x + "," + light[c].position.y + "," + light[c].position.z)
+							}
 
 							particle.rotation.x = Math.random() * 360;
 							scene.add(particle);
