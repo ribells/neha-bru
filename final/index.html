@@ -38,6 +38,8 @@
 	var legs = "";
 	var legs_direction = 1;
 	
+	var instructions_loaded = false;
+	
 	class Cloud {
 	  constructor(x, y, dx, dy, color, intensity, falloff, num_particles) {
 		this.x = x;
@@ -177,7 +179,7 @@
 		if (lastTime != null) 
 		{
     		delta += time - lastTime
-    		console.log(delta)
+    		//console.log(delta)
   		}
   		lastTime = time;
   		requestAnimationFrame(animate);
@@ -228,8 +230,14 @@
 					}
 				});
 				
-				if(player != "") 
-				{    
+				if(player != "" && arms != "" && legs != "") {
+					if(instructions_loaded == false ) {
+						document.getElementById("hud").innerHTML = "Norby got lost on his way and encountered some dangerous looking clouds.<br/>Help him find his way back<br/>HERE IS THE STARTING INFORMATION:<br/>USE the W and S keys to avoid the clouds while flying<br/>Reach the end without hitting the clouds to win";
+						document.getElementById("hud").style.color = "black";
+						document.getElementById("hud").style.fontSize = "24px";
+						instuctions_loaded = true;
+					}
+					   
 					arms.position.y = player.position.y;
 					arms.position.x = player.position.x;
 					arms.rotation.z += 0.005 * arms_direction;
@@ -332,7 +340,6 @@
                 }
                 
 				//add a player
-				player = this;
 				var glloader = new THREE.GLTFLoader();
 				glloader.load(
 				  "Norby the final.glb",
@@ -345,7 +352,6 @@
 				   }
 				);
 				
-				arms = this;
 				glloader.load(
 				  "Norby's arms.glb",
 				   function ( gltf ) {
@@ -357,7 +363,6 @@
 				   }
 				);
 				
-				legs = this;
 				glloader.load(
 				  "Norby's legs.glb",
 				   function ( gltf ) {
